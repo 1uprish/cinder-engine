@@ -127,6 +127,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Eve owns the conversation in Cinder. The embedded workbench keeps every CAD
+   editing surface while removing AgentCAD's optional, duplicate prompt UI. */
+body.cinder-embed #chat-dock,
+body.cinder-embed #generate-btn {
+  display: none !important;
+}
+
 button {
   font: inherit;
   color: inherit;

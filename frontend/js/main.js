@@ -29,6 +29,8 @@ import * as auth from "./auth.js";
 import * as workspace from "./workspace.js";
 import * as cloud from "./cloud.js";
 import { setupShare } from "./share-links.js";
+import { applyCinderEmbed, focusCinderWorkbench, readCinderContext,
+         readWorkbenchArgs } from "./cinder_embed.js";
 // The server's identifier rules, spelled once (`frontend/js/patterns.js`) and
 // fed to every dialog field's `pattern` through `bare()`.
 import { ID_RE, BRANCH_RE, bare } from "./patterns.js";
@@ -57,6 +59,16 @@ let assemblyRefreshTimer = null;
 let projectRefreshTimer = null;
 let lockHolder = null; // current turn-lock holder for this project (or null)
 let branchSwitchUntil = 0; // suppress the branch_changed echo of our own switch
+const cinderContext = readCinderContext(window.location.search);
+
+function focusWorkbench(context) {
+  return focusCinderWorkbench(context, {
+    currentProject: () => state.projectName,
+    loadProject,
+    selectPart,
+    closeDashboard: () => dashboard.close(),
+  });
+}
 
 // ----------------------------------------------------------------- panel API
 // The dependency object every panel module receives. It was called `actions`
@@ -3174,7 +3186,7 @@ function registerActions() {
   // path onto the same tool, hence "Agent" and not "Model": the verb is
   // asking the built-in agent to author a part, not editing one.
   A({ id: "agent.generate", title: "Generate a part…", group: "Agent",
-      when: hasProject,
+      when: (c) => hasProject(c) && !cinderContext.embedded,
       keywords: ["generate", "prompt", "ai", "task-to-part", "candidates"],
       run: () => generate.open() });
 
@@ -3227,6 +3239,10 @@ function registerActions() {
   dialogs.register("open-project", (args) => openProjectPrompt(args), {
     title: "Open project by path…",
     description: "Open a project directory that is not in the list",
+  });
+  dialogs.register("workbench", (args) => focusWorkbench(readWorkbenchArgs(args)), {
+    title: "CAD workbench",
+    description: "Open a project and optionally focus one part",
   });
   dialogs.register("new-branch", (args) => newBranchPrompt(args), {
     title: "New branch…", description: "Branch the current project",
@@ -3320,6 +3336,7 @@ async function boot() {
   // any panel installs one of its own.
   initToasts(document.getElementById("toasts"));
   dialogs.init(document.getElementById("dialog-host"));
+  applyCinderEmbed(document, cinderContext);
   theme.init(); // before viewport.init so the scene is born with the stored palette
 
   // Identity first: in hosted mode there is nothing to render until we know
@@ -3410,7 +3427,7 @@ async function boot() {
   materials.init(panelApi);
   skills.init(panelApi);
   presence.init();
-  generate.init(panelApi);
+  if (!cinderContext.embedded) generate.init(panelApi);
   // PRD-005 slice 8: no-ops in local mode and on an untenanted hosted
   // instance (`identity.orgs` empty) — the switcher renders nothing and the
   // two panels' menu/palette rows never appear eligible (`hasOrgs` below).
@@ -3470,7 +3487,8 @@ async function boot() {
 
   await refreshProjectsList();
   const stored = localStorage.getItem("agentcad.project");
-  const initial = state.projects.find((p) => p.name === stored);
+  const preferred = cinderContext.project || stored;
+  const initial = state.projects.find((p) => p.name === preferred);
   if (initial) {
     await loadProject(initial.name);
   } else {
@@ -3481,6 +3499,9 @@ async function boot() {
     // "New project…" card is the next thing to do.
     updateEmptyState();
     await dashboard.open();
+  }
+  if (cinderContext.project || cinderContext.part) {
+    await focusWorkbench(cinderContext);
   }
 
   // The `#materials` hash opens the modal AFTER the workbench inits — unlike
