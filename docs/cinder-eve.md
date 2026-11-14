@@ -9,6 +9,10 @@ Eve remains the only conversational agent. Do not configure
 `ANTHROPIC_API_KEY` for the Cinder runtime; AgentCAD's optional built-in
 generation loop is not part of the product path.
 
+In local development, `?embed=cinder` keeps the AgentCAD editing surfaces and
+adds Eve's chat-only renderer at the far right. The rail uses Eve's canonical
+hidden Cinder session; AgentCAD does not send prompts or run a second agent.
+
 ## Hermes plugin contract
 
 The repository root is an Agent Plugins v1 package. Hermes installs it as a

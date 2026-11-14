@@ -134,6 +134,24 @@ body.cinder-embed #generate-btn {
   display: none !important;
 }
 
+#eve-chat-rail {
+  width: 360px;
+  min-width: 320px;
+  flex: none;
+  border-left: 1px solid var(--hairline);
+  background: var(--panel);
+}
+
+#eve-chat-rail[hidden] { display: none; }
+
+#eve-chat-rail iframe {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+  background: var(--panel);
+}
+
 button {
   font: inherit;
   color: inherit;

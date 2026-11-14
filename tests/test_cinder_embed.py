@@ -45,6 +45,36 @@ def test_embed_query_is_explicit_and_carries_workbench_focus() -> None:
     }
 
 
+def test_embed_mounts_eve_chat_only_for_cinder() -> None:
+    got = run_js("""
+      const classes = new Set();
+      const frame = {
+        dataset: {src: "http://127.0.0.1:5174/?embed=cinder-chat"},
+        attrs: {},
+        getAttribute(name) { return this.attrs[name] || null; },
+        setAttribute(name, value) { this.attrs[name] = value; },
+      };
+      const rail = {hidden: true, querySelector: () => frame};
+      const doc = {
+        body: {classList: {toggle: (name, on) => on ? classes.add(name) : classes.delete(name)}},
+        getElementById: (id) => id === "eve-chat-rail" ? rail : null,
+      };
+
+      cinder.applyCinderEmbed(doc, {embedded: true});
+      const mounted = {hidden: rail.hidden, src: frame.attrs.src, active: classes.has("cinder-embed")};
+      cinder.applyCinderEmbed(doc, {embedded: false});
+      out({mounted, ordinary: {hidden: rail.hidden, active: classes.has("cinder-embed")}});
+    """)
+    assert got == {
+        "mounted": {
+            "hidden": False,
+            "src": "http://127.0.0.1:5174/?embed=cinder-chat",
+            "active": True,
+        },
+        "ordinary": {"hidden": True, "active": False},
+    }
+
+
 def test_focus_loads_project_before_part_and_closes_dashboard() -> None:
     got = run_js("""
       let current = "old";

@@ -24,7 +24,18 @@ export function readWorkbenchArgs(args) {
 }
 
 export function applyCinderEmbed(doc, context) {
-  doc.body.classList.toggle("cinder-embed", !!context.embedded);
+  const embedded = !!context.embedded;
+  doc.body.classList.toggle("cinder-embed", embedded);
+
+  const rail = doc.getElementById("eve-chat-rail");
+  if (!rail) return;
+
+  rail.hidden = !embedded;
+  const frame = rail.querySelector("iframe");
+  const source = frame?.dataset.src;
+  if (embedded && frame && source && !frame.getAttribute("src")) {
+    frame.setAttribute("src", source);
+  }
 }
 
 export async function focusCinderWorkbench(context, deps) {
