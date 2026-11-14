@@ -1,0 +1,15 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "cinder": {
+      "type": "stdio",
+      "command": "./run-cinder-mcp",
+      "args": [],
+      "env": {
+        "AGENTCAD_CONFIG": "${PLUGIN_DATA}/config.json",
+        "AGENTCAD_STATE_DIR": "${PLUGIN_DATA}/state",
+        "AGENTCAD_PROJECTS_DIR": "${PLUGIN_DATA}/projects"
+      }
+    }
+  }
+}

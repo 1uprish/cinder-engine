@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+
+: "${PLUGIN_ROOT:?Hermes must provide PLUGIN_ROOT}"
+: "${PLUGIN_DATA:?Hermes must provide PLUGIN_DATA}"
+
+export AGENTCAD_CONFIG="${AGENTCAD_CONFIG:-${PLUGIN_DATA}/config.json}"
+export AGENTCAD_STATE_DIR="${AGENTCAD_STATE_DIR:-${PLUGIN_DATA}/state}"
+export AGENTCAD_PROJECTS_DIR="${AGENTCAD_PROJECTS_DIR:-${PLUGIN_DATA}/projects}"
+
+exec uv run --directory "${PLUGIN_ROOT}" agentcad mcp

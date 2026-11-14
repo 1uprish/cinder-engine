@@ -1,0 +1,15 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "cinder-engine",
+  "version": "0.1.0",
+  "description": "Parametric CAD workbench and MCP tool surface for Eve Cinder",
+  "extensions": {
+    "com.nousresearch.hermes": {
+      "servers": {
+        "cinder": {
+          "timeout": 600
+        }
+      }
+    }
+  }
+}
